@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROFILE - Sato Official</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --text-body: #333333;
+            --accent-pink: #ff8cb6;
+            --accent-blue: #70e8e0;
+            --accent-gold: #f0d550;
+            --bg-color: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 1.0);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            color: var(--primary-color);
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        /* Background Canvas */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: flex-end;
+            gap: 2.5rem;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-family: 'Italiana', serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            transition: color 0.3s;
+            font-weight: 600;
+        }
+        .nav-item:hover { color: var(--accent-pink); }
+
+        /* Hero Section */
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        .hero-logo {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.5rem;
+            color: var(--accent-pink);
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-family: 'Italiana', serif;
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 400;
+            line-height: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-desc {
+            font-size: 1.2rem;
+            letter-spacing: 0.2em;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Section Commons */
+        section {
+            padding: 8rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .section-title {
+            font-family: 'Italiana', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 4rem;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        }
+
+        /* About */
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .profile-layout { grid-template-columns: 1fr; text-align: center; }
+            .glass-card { padding: 2.5rem; }
+        }
+
+        .profile-img-placeholder {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #ffeef5 0%, #e0fcf9 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Italiana', serif;
+            font-size: 3rem;
+            color: var(--accent-pink);
+            border: 8px solid #fff;
+        }
+
+        .profile-name {
+            font-family: 'Italiana', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-tag {
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            background: var(--accent-pink);
+            color: #fff;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Favorites Grid */
+        .fav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .fav-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid #fff;
+        }
+
+        .fav-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .fav-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .fav-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .fav-desc {
+            font-size: 0.95rem;
+            color: var(--text-body);
+        }
+
+        /* Contact Form */
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--accent-pink);
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-family: inherit;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .submit-btn {
+            background: var(--accent-pink);
+            color: #fff;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.8;
+        }
+
+        footer {
+            padding: 4rem;
+            text-align: center;
+            font-family: 'Italiana', serif;
+            color: #999;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <nav>
+        <a href="#about" class="nav-item">About</a>
+        <a href="#favorites" class="nav-item">Favorites</a>
+        <a href="#contact" class="nav-item">Contact</a>
+    </nav>
+
+    <div class="hero-section">
+        <span class="hero-logo">Welcome to</span>
+        <h1 class="hero-title">Sato's World</h1>
+        <p class="hero-desc">AI勉強マン / Enthusiast</p>
+    </div>
+
+    <section id="about">
+        <h2 class="section-title">About Me</h2>
+        <div class="glass-card">
+            <div class="profile-layout">
+                <div class="profile-img-placeholder">S</div>
+                <div class="profile-text">
+                    <h3 class="profile-name">Sato（サト）</h3>
+                    <span class="profile-tag">AI勉強マン</span>
+                    <p>
+                        最新のテクノロジーと日常の癒やしを大切にしている「AI勉強マン」です。<br>
+                        日々の発見や、大好きなものに囲まれて暮らしています。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="favorites">
+        <h2 class="section-title">Favorite Things</h2>
+        <div class="fav-grid">
+            <div class="fav-item">
+                <span class="fav-icon">🍜</span>
+                <h3 class="fav-title">ラーメン</h3>
+                <p class="fav-desc">濃いめの味噌ラーメンが大好き。自分へのご褒美はいつもこれです。</p>
+            </div>
+            <div class="fav-item">
+                <span class="fav-icon">📱</span>
+                <h3 class="fav-title">ゲーム</h3>
+                <p class="fav-desc">最近は時間がなくて、もっぱらスマホゲーム専門。隙間時間の楽しみです。</p>
+            </div>
+            <div class="fav-item">
+                <span class="fav-icon">🐈</span>
+                <h3 class="fav-title">猫</h3>
+                <p class="fav-desc">猫に癒やされている時間が最高に幸せ。見ているだけで心が洗われます。</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title">Contact</h2>
+        <div class="glass-card">
+            <form id="contact-form" class="contact-form">
+                <div class="form-group">
+                    <label>NAME</label>
+                    <input type="text" name="name" placeholder="お名前を入力してください" required>
+                </div>
+                <div class="form-group">
+                    <label>EMAIL</label>
+                    <input type="email" name="email" placeholder="メールアドレスを入力してください" required>
+                </div>
+                <div class="form-group">
+                    <label>MESSAGE</label>
+                    <textarea name="message" rows="5" placeholder="メッセージを入力してください" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" id="submit-btn">SEND MESSAGE</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2024 Sato. Created with 🙍プロフサイトメーカー
+    </footer>
+
+    <script>
+        // --- Three.js Background Simulation ---
+        let renderer, scene, camera, mesh;
+        let mouse = new THREE.Vector2(0, 0);
+        let targetMouse = new THREE.Vector2(0, 0);
+
+        function initBackground() {
+            const container = document.getElementById('canvas-container');
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            scene = new THREE.Scene();
+            camera = new THREE.Camera();
+            camera.position.z = 1;
+
+            const geometry = new THREE.PlaneBufferGeometry(2, 2);
+            
+            // Fragment Shader for Aurora-like fluid effect
+            const fragmentShader = `
+                uniform float u_time;
+                uniform vec2 u_resolution;
+                uniform vec2 u_mouse;
+
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+                    float dist = distance(uv, u_mouse);
+                    
+                    vec3 col1 = vec3(0.43, 0.91, 0.87); // Tiffany Blue
+                    vec3 col2 = vec3(1.0, 0.55, 0.71); // Pink
+                    vec3 col3 = vec3(0.94, 0.83, 0.31); // Gold
+                    
+                    float noise = sin(uv.x * 3.0 + u_time * 0.5) * cos(uv.y * 2.0 + u_time * 0.3);
+                    vec3 finalCol = mix(col1, col2, uv.x + noise);
+                    finalCol = mix(finalCol, col3, (1.0 - uv.y) * 0.5);
+                    
+                    // Interaction
+                    float m = smoothstep(0.2, 0.0, dist);
+                    finalCol += m * 0.2;
+
+                    gl_FragColor = vec4(finalCol, 1.0);
+                }
+            `;
+
+            const uniforms = {
+                u_time: { value: 0 },
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                u_mouse: { value: new THREE.Vector2(0.5, 0.5) }
+            };
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: uniforms,
+                fragmentShader: fragmentShader
+            });
+
+            mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('mousemove', (e) => {
+                targetMouse.x = e.clientX / window.innerWidth;
+                targetMouse.y = 1.0 - (e.clientY / window.innerHeight);
+            });
+
+            animate();
+        }
+
+        function onWindowResize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            mesh.material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            mouse.lerp(targetMouse, 0.05);
+            mesh.material.uniforms.u_time.value += 0.01;
+            mesh.material.uniforms.u_mouse.value.copy(mouse);
+            renderer.render(scene, camera);
+        }
+
+        window.onload = initBackground;
+
+        // --- Contact Form Logic (GAS) ---
+        const contactForm = document.getElementById('contact-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxPgL4HZKxEdWbzsysnfYovrlY3JdpyOy9-VfyqFRPmTZmB_LbfZXKTWqazDDxPkh9d9g/exec';
+
+        contactForm.addEventListener('submit', e => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.innerText = "SENDING...";
+
+            const formData = new FormData(contactForm);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors', // GAS post sometimes requires this
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert('お問い合わせありがとうございます。送信されました！');
+                contactForm.reset();
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert('送信中にエラーが発生しました。');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "SEND MESSAGE";
+            });
+        });
+    </script>
+</body>
+</html>
